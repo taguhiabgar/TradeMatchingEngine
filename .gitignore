@@ -1,0 +1,9 @@
+build/
+*.o
+*.out
+*.obj
+*.exe
+.DS_Store
+*.xcodeproj/
+*.xcworkspace/
+
