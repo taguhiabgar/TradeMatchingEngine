@@ -9,8 +9,14 @@ int main() {
     MatchingEngine engine;
     Order order;
     
+    int counter = 0;
+    
     while (std::cin >> order) {
-        engine.processOrder();
+        std::cout << std::endl << "  ------  " << ++counter << "  ------  " << std::endl << std::endl;
+        
+        engine.processOrder(order);
+        
+        std::cout << std::endl;
     }
     
     return 0;
