@@ -5,6 +5,9 @@
 
 namespace engine {
 
+using Price = unsigned;
+using Quantity = unsigned;
+
 struct Order {
     enum class Side {
         Buy,
@@ -13,8 +16,8 @@ struct Order {
     
     std::string traderId;
     Side side;
-    unsigned quantity;
-    unsigned price;
+    Quantity quantity;
+    Price price;
     
     bool isBuy() const noexcept { return side == Side::Buy; }
     bool isSell() const noexcept { return side == Side::Sell; }

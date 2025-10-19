@@ -27,7 +27,7 @@ private:
             return {};
         }
         
-        auto isPriceMatchable = [&](unsigned aggressorPrice, unsigned bookPrice) {
+        auto isPriceMatchable = [&](Price aggressorPrice, Price bookPrice) {
             const auto compareFunc = aggressorBook.key_comp();
             return aggressorPrice == bookPrice || compareFunc(aggressorPrice, bookPrice);
         };
@@ -69,8 +69,8 @@ private:
     void printBuysSells() const noexcept;
     
 private:
-    std::map<unsigned, std::deque<Order>, std::greater<unsigned>> buys;
-    std::map<unsigned, std::deque<Order>, std::less<unsigned>> sells;
+    std::map<Price, std::deque<Order>, std::greater<Price>> buys;
+    std::map<Price, std::deque<Order>, std::less<Price>> sells;
 };
 
 } // namespace engine
