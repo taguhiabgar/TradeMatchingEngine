@@ -16,6 +16,12 @@ std::istream& operator>>(std::istream& is, Order& order) {
     return is;
 }
 
+std::ostream& operator<<(std::ostream& os, const Order& order) {
+    char side = (order.side == Order::Side::Buy ? 'B' : 'S');
+    os << order.traderId << ' ' << side << ' ' << order.quantity << ' ' << order.price;
+    return os;
+}
+
 } // namespace engine
 
 
