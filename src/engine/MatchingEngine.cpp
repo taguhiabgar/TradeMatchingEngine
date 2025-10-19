@@ -2,72 +2,50 @@
 
 namespace engine {
 
-void MatchingEngine::processOrder(const Order& order) {
-    std::cout << "process order: " << order << std::endl;
-    if (order.isBuy()) {
-        matchBuyOrder(order);
+void MatchingEngine::printBuysSells() const noexcept {
+    std::cout << std::endl << "Buys:" << std::endl << "{" << std::endl;
+
+    for (const auto& [price, orders] : buys) {
+        std::cout << "    ";
+        for (const auto& order : orders) {
+            std::cout << order << ", ";
+        }
+        std::cout << std::endl;
+    }
+    
+    std::cout << "}" << std::endl;
+    std::cout << "Sells:" << std::endl << "{" << std::endl;
+    
+    for (const auto& [price, orders]  : sells) {
+        std::cout << "    ";
+        for (const auto& order : orders) {
+            std::cout << order << ", ";
+        }
+        std::cout << std::endl;
+    }
+    
+    std::cout << "}" << std::endl << std::endl;
+}
+
+void MatchingEngine::processOrder(Order& aggressor) {
+    std::cout << "process order: " << aggressor << std::endl;
+    
+    if (aggressor.isBuy()) {
+        executeTrades(aggressor, sells, buys);
     } else {
-        matchSellOrder(order);
-    }
-}
-
-// TODO: replace int with Trade object
-std::vector<int> MatchingEngine::matchBuyOrder(const Order& aggressor) noexcept {
-    // TODO: replace int with Trade object
-    // std::vector<int> trades = matchOrderInternal(aggressor, sells);
-    return matchOrderInternal(aggressor, sells);
-    
-}
-
-// TODO: replace int with Trade object
-std::vector<int> MatchingEngine::matchSellOrder(const Order& aggressor) noexcept {
-    // TODO: replace int with Trade object
-    //std::vector<int> trades = matchOrderInternal(aggressor, buys);
-    return matchOrderInternal(aggressor, buys);
-    
-}
-
-// TODO: replace int with Trade object
-template <typename Map>
-std::vector<int> MatchingEngine::matchOrderInternal(const Order& aggressor, Map& restingOrders)
-{
-    if (restingOrders.empty()) {
-        addRestingOrder(aggressor);
-        return {};
+        executeTrades(aggressor, buys, sells);
     }
     
-    auto [bestPrice, bestOrder] = *restingOrders.begin();
-    
-    auto compareFunc = restingOrders.key_comp();
-    if (compareFunc(aggressor.price, bestPrice)) { // match was made
-        std::cout << "trade" << std::endl;
-        return {0};
-    } else { // no match
-        std::cout << "no trade - make resting order" << std::endl;
-        restingOrders[aggressor.price] = aggressor;
-    }
-    
-    std::cout << "bestPrice: " << bestPrice << ", bestOrder: " << bestOrder << std::endl;
-    
-    for (const auto& [price, order] : restingOrders) {
-        std::cout << order << '\n';
-    }
-    
-    if (aggressor.quantity > 0) {
-        addRestingOrder(aggressor);
-        
-    }
-    
-    return {};
+    printBuysSells();
 }
 
 void MatchingEngine::addRestingOrder(const Order& order) noexcept {
     std::cout << "add resting order: " << order << std::endl;
     
     if (order.isBuy()) {
-        buys.emplace(order.price, order);
+        buys[order.price].push_back(order);
     } else {
-        sells.emplace(order.price, order);
+        sells[order.price].push_back(order);
     }
 }
 

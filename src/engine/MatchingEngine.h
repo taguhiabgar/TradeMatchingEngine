@@ -4,6 +4,8 @@
 
 #include <map>
 #include <vector>
+#include <deque>
+#include <algorithm>
 
 namespace engine {
 
@@ -11,20 +13,64 @@ namespace engine {
 
 class MatchingEngine {
 public:
-    void processOrder(const Order& order);
+    void processOrder(Order& order);
 
 private:
-    std::vector<int> matchBuyOrder(const Order& aggressor) noexcept;
-    std::vector<int> matchSellOrder(const Order& aggressor) noexcept;
     void addRestingOrder(const Order& aggressor) noexcept;
     
     // TODO: replace int with Trade object
-    template <typename Map>
-    std::vector<int> matchOrderInternal(const Order& aggressor, Map& restingOrders);
+    template <typename OwnBook, typename OpposingBook>
+    std::vector<int> executeTrades(Order& aggressor, OpposingBook& opposingBook, OwnBook& aggressorBook)
+    {
+        if (opposingBook.empty()) {
+            addRestingOrder(aggressor);
+            return {};
+        }
+        
+        auto isPriceMatchable = [&](unsigned aggressorPrice, unsigned bookPrice) {
+            const auto compareFunc = aggressorBook.key_comp();
+            return aggressorPrice == bookPrice || compareFunc(aggressorPrice, bookPrice);
+        };
+        
+        auto bestPrice = opposingBook.begin()->first;
+        while (aggressor.isActive() && isPriceMatchable(aggressor.price, bestPrice)) {
+            std::cout << "-->  TRADE: " << aggressor.price << ", " << bestPrice << std::endl;
+            
+            auto& bestOrders = opposingBook[bestPrice];
+            if (bestOrders.empty()) {
+                opposingBook.erase(bestPrice);
+                bestPrice = opposingBook.begin()->first; // recalculate best price
+                continue;
+            }
+            
+            if (!bestOrders.front().isActive()) {
+                bestOrders.pop_front();
+                bestPrice = opposingBook.begin()->first; // recalculate best price
+                continue;
+            }
+            
+            auto minQuantity = std::min(aggressor.quantity, bestOrders.front().quantity);
+            // make trade
+            aggressor.quantity -= minQuantity;
+            bestOrders.front().quantity -= minQuantity;
+            // TODO: add to trades vector
+            
+            bestPrice = opposingBook.begin()->first; // recalculate best price
+        }
+        
+        if (aggressor.isActive()) {
+            addRestingOrder(aggressor);
+        }
+        
+        return {};
+    }
+    
+    // TODO: delete - debug function
+    void printBuysSells() const noexcept;
     
 private:
-    std::map<unsigned, Order, std::greater<unsigned>> buys;
-    std::map<unsigned, Order, std::less<unsigned>> sells;
+    std::map<unsigned, std::deque<Order>, std::greater<unsigned>> buys;
+    std::map<unsigned, std::deque<Order>, std::less<unsigned>> sells;
 };
 
 } // namespace engine

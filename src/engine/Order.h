@@ -18,6 +18,7 @@ struct Order {
     
     bool isBuy() const noexcept { return side == Side::Buy; }
     bool isSell() const noexcept { return side == Side::Sell; }
+    bool isActive() const { return quantity > 0; }
 };
 
 std::istream& operator>>(std::istream& is, Order& order);
