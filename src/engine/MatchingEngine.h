@@ -2,11 +2,10 @@
 
 #include "Order.h"
 #include "OrderBook.h"
+#include "Trade.h"
 
-#include <map>
+#include <set>
 #include <vector>
-#include <deque>
-#include <algorithm>
 
 namespace engine {
 
@@ -19,11 +18,10 @@ public:
 private:
     void addRestingOrder(const Order& aggressor) noexcept;
     
-    // TODO: replace int with Trade object
     template <typename OwnBook, typename OpposingBook>
-    std::vector<int> executeTrades(Order& aggressor, OpposingBook& opposingBook, OwnBook& aggressorBook)
+    [[nodiscard]] std::multiset<Trade> executeTrades(Order& aggressor, OpposingBook& opposingBook, OwnBook& aggressorBook)
     {
-        std::vector<int> trades;
+        std::multiset<Trade> trades;
         
         if (opposingBook.empty()) {
             addRestingOrder(aggressor);
@@ -37,7 +35,7 @@ private:
         Price bestPrice = bestPriceOpt.value();
         
         while (aggressor.isActive() && aggressorBook.isPriceMatchable(aggressor.price, bestPrice)) {
-            std::cout << "-->  TRADE: " << aggressor.price << ", " << bestPrice << std::endl;
+//            std::cout << "-->  TRADE: " << aggressor.price << ", " << bestPrice << std::endl;
             
             Order* bestOrder = opposingBook.getBestOrder();
             if (bestOrder == nullptr) {
@@ -48,7 +46,10 @@ private:
             // make trade
             aggressor.quantity -= tradeQuantity;
             bestOrder->quantity -= tradeQuantity;
-            // TODO: add to trades vector
+            
+            // TODO: combine trades if necessary
+            trades.emplace(aggressor.traderId, aggressor.side, tradeQuantity, bestOrder->price);
+            trades.emplace(bestOrder->traderId, bestOrder->side, tradeQuantity, bestOrder->price);
             
             opposingBook.removeInactiveOrders();
             
@@ -68,6 +69,7 @@ private:
     
     // TODO: delete - debug function
     void printBuysSells() const noexcept;
+    void printTrades(const std::multiset<Trade>& trades) const noexcept;
     
 private:
     OrderBook buys{std::greater<Price>{}};
