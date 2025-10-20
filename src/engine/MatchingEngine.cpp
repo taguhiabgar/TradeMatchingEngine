@@ -3,28 +3,15 @@
 namespace engine {
 
 void MatchingEngine::printBuysSells() const noexcept {
-    std::cout << std::endl << "Buys:" << std::endl << "{" << std::endl;
-
-    for (const auto& [price, orders] : buys) {
-        std::cout << "    ";
-        for (const auto& order : orders) {
-            std::cout << order << ", ";
-        }
-        std::cout << std::endl;
-    }
+    std::cout << std::endl << "Buys:" << std::endl;
     
-    std::cout << "}" << std::endl;
-    std::cout << "Sells:" << std::endl << "{" << std::endl;
+    buys.print();
     
-    for (const auto& [price, orders]  : sells) {
-        std::cout << "    ";
-        for (const auto& order : orders) {
-            std::cout << order << ", ";
-        }
-        std::cout << std::endl;
-    }
+    std::cout << "Sells:" << std::endl;
     
-    std::cout << "}" << std::endl << std::endl;
+    sells.print();
+    
+    std::cout << std::endl << std::endl;
 }
 
 void MatchingEngine::processOrder(Order& aggressor) {
@@ -43,9 +30,9 @@ void MatchingEngine::addRestingOrder(const Order& order) noexcept {
     std::cout << "add resting order: " << order << std::endl;
     
     if (order.isBuy()) {
-        buys[order.price].push_back(order);
+        buys.addRestingOrder(order);
     } else {
-        sells[order.price].push_back(order);
+        sells.addRestingOrder(order);
     }
 }
 
