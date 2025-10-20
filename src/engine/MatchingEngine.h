@@ -19,9 +19,9 @@ private:
     void addRestingOrder(const Order& aggressor) noexcept;
     
     template <typename OwnBook, typename OpposingBook>
-    [[nodiscard]] std::multiset<Trade> executeTrades(Order& aggressor, OpposingBook& opposingBook, OwnBook& aggressorBook)
+    [[nodiscard]] std::set<Trade> executeTrades(Order& aggressor, OpposingBook& opposingBook, OwnBook& aggressorBook)
     {
-        std::multiset<Trade> trades;
+        std::set<Trade> trades;
         
         if (opposingBook.empty()) {
             addRestingOrder(aggressor);
@@ -35,8 +35,6 @@ private:
         Price bestPrice = bestPriceOpt.value();
         
         while (aggressor.isActive() && aggressorBook.isPriceMatchable(aggressor.price, bestPrice)) {
-//            std::cout << "-->  TRADE: " << aggressor.price << ", " << bestPrice << std::endl;
-            
             Order* bestOrder = opposingBook.getBestOrder();
             if (bestOrder == nullptr) {
                 return trades;
@@ -47,9 +45,8 @@ private:
             aggressor.quantity -= tradeQuantity;
             bestOrder->quantity -= tradeQuantity;
             
-            // TODO: combine trades if necessary
-            trades.emplace(aggressor.traderId, aggressor.side, tradeQuantity, bestOrder->price);
-            trades.emplace(bestOrder->traderId, bestOrder->side, tradeQuantity, bestOrder->price);
+            insertOrMerge(trades, Trade{aggressor.traderId, aggressor.side, tradeQuantity, bestOrder->price});
+            insertOrMerge(trades, Trade{bestOrder->traderId, bestOrder->side, tradeQuantity, bestOrder->price});
             
             opposingBook.removeInactiveOrders();
             
@@ -67,9 +64,9 @@ private:
         return trades;
     }
     
-    // TODO: delete - debug function
-    void printBuysSells() const noexcept;
-    void printTrades(const std::multiset<Trade>& trades) const noexcept;
+    void insertOrMerge(std::set<Trade>& trades, const Trade& newTrade);
+    
+    void printTrades(const std::set<Trade>& trades) const noexcept;
     
 private:
     OrderBook buys{std::greater<Price>{}};

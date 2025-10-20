@@ -2,20 +2,10 @@
 
 namespace engine {
 
-void MatchingEngine::printBuysSells() const noexcept {
-//    std::cout << std::endl << "Buys:" << std::endl;
-//    
-//    buys.print();
-//    
-//    std::cout << "Sells:" << std::endl;
-//    
-//    sells.print();
-//    
-//    std::cout << std::endl << std::endl;
-}
-
-void MatchingEngine::printTrades(const std::multiset<Trade>& trades) const noexcept {
-    // TODO: should combine trades if necessary?
+void MatchingEngine::printTrades(const std::set<Trade>& trades) const noexcept {
+    if (trades.empty()) {
+        return;
+    }
     for (const auto& trade: trades) {
         std::cout << trade << ' ';
     }
@@ -23,8 +13,6 @@ void MatchingEngine::printTrades(const std::multiset<Trade>& trades) const noexc
 }
 
 void MatchingEngine::processOrder(Order& aggressor) {
-//    std::cout << "process order: " << aggressor << std::endl;
-    
     if (aggressor.isBuy()) {
         auto trades = executeTrades(aggressor, sells, buys);
         printTrades(trades);
@@ -32,18 +20,24 @@ void MatchingEngine::processOrder(Order& aggressor) {
         auto trades = executeTrades(aggressor, buys, sells);
         printTrades(trades);
     }
-    
-    printBuysSells();
-    
 }
 
 void MatchingEngine::addRestingOrder(const Order& order) noexcept {
-//    std::cout << "add resting order: " << order << std::endl;
-    
     if (order.isBuy()) {
         buys.addRestingOrder(order);
     } else {
         sells.addRestingOrder(order);
+    }
+}
+
+void MatchingEngine::insertOrMerge(std::set<Trade>& trades, const Trade& newTrade) {
+    auto it = trades.find(newTrade);
+    if (it != trades.end()) {
+        Quantity combinedQuantity = it->quantity + newTrade.quantity;
+        it = trades.erase(it);
+        trades.emplace_hint(it, Trade{newTrade.traderId, newTrade.side, combinedQuantity, newTrade.price});
+    } else {
+        trades.emplace(newTrade);
     }
 }
 
