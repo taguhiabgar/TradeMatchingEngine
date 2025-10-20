@@ -49,18 +49,6 @@ void OrderBook::removeInactiveOrders() noexcept {
     }
 }
 
-void OrderBook::print() const noexcept {
-    std::cout << "{" << std::endl;
-    for (const auto& [price, orders] : priceLevels) {
-        std::cout << "    ";
-        for (const auto& order : orders) {
-            std::cout << order << ", ";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "}" << std::endl;
-}
-
 } // namespace engine
 
 

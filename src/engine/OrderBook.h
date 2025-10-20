@@ -32,8 +32,6 @@ public:
     // removes empty price levels and orders with zero quantity at the best price
     void removeInactiveOrders() noexcept;
     
-    void print() const noexcept;
-    
 private:
     BookMap priceLevels;
 };
