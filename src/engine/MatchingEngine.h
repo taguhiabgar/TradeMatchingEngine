@@ -17,52 +17,36 @@ public:
 
 private:
     void addRestingOrder(const Order& aggressor) noexcept;
-    
+
+    // executes trades between aggressor and the opposing side
+    // buy orders are matched to the lowest sell prices (ascending)
+    // sell orders are matched to the highest buy prices (descending)
     template <typename OwnBook, typename OpposingBook>
     [[nodiscard]] std::set<Trade> executeTrades(Order& aggressor, OpposingBook& opposingBook, OwnBook& aggressorBook)
     {
         std::set<Trade> trades;
-        
-        if (opposingBook.empty()) {
-            addRestingOrder(aggressor);
-            return trades;
-        }
-        
-        auto bestPriceOpt = opposingBook.bestPrice();
-        if (bestPriceOpt == std::nullopt) {
-            return trades;
-        }
-        Price bestPrice = bestPriceOpt.value();
-        
-        while (aggressor.isActive() && aggressorBook.isPriceMatchable(aggressor.price, bestPrice)) {
+
+        auto isMatchPossible = [&] {
+            auto bestPriceOpt = opposingBook.bestPrice();
+            return bestPriceOpt && aggressorBook.isPriceMatchable(aggressor.price, *bestPriceOpt);
+        };
+
+        while (aggressor.isActive() && isMatchPossible()) {
             Order* bestOrder = opposingBook.getBestOrder();
-            if (bestOrder == nullptr) {
-                return trades;
-            }
-            
-            auto tradeQuantity = std::min(aggressor.quantity, bestOrder->quantity);
-            // make trade
-            aggressor.quantity -= tradeQuantity;
-            bestOrder->quantity -= tradeQuantity;
-            
-            insertOrMerge(trades, Trade{aggressor.traderId, aggressor.side, tradeQuantity, bestOrder->price});
-            insertOrMerge(trades, Trade{bestOrder->traderId, bestOrder->side, tradeQuantity, bestOrder->price});
-            
+            if (!bestOrder) break;
+            Quantity tradeQuantity = std::min(aggressor.quantity, bestOrder->quantity);
+            processTrade(aggressor, *bestOrder, tradeQuantity, trades);
             opposingBook.removeInactiveOrders();
-            
-            bestPriceOpt = opposingBook.bestPrice();
-            if (bestPriceOpt == std::nullopt) {
-                return trades;
-            }
-            bestPrice = bestPriceOpt.value(); // recalculate best price
         }
-        
+
         if (aggressor.isActive()) {
             addRestingOrder(aggressor);
         }
-        
         return trades;
     }
+    
+    // process a trade between two orders and record the trades
+    void processTrade(Order& aggressor, Order& restingOrder, Quantity tradeQuantity, std::set<Trade>& trades);
     
     void insertOrMerge(std::set<Trade>& trades, const Trade& newTrade);
     

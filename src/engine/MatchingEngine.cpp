@@ -41,5 +41,12 @@ void MatchingEngine::insertOrMerge(std::set<Trade>& trades, const Trade& newTrad
     }
 }
 
+void MatchingEngine::processTrade(Order& aggressor, Order& restingOrder, Quantity tradeQuantity, std::set<Trade>& trades) {
+    aggressor.quantity -= tradeQuantity;
+    restingOrder.quantity -= tradeQuantity;
+    // record trade for both counterparties
+    insertOrMerge(trades, Trade{aggressor.traderId, aggressor.side, tradeQuantity, restingOrder.price});
+    insertOrMerge(trades, Trade{restingOrder.traderId, restingOrder.side, tradeQuantity, restingOrder.price});
+}
 
 } // namespace engine
