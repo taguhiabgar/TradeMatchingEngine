@@ -1,19 +1,12 @@
 #pragma once
 
+#include "CommonTypes.h"
 #include <iostream>
 #include <string>
 
 namespace engine {
 
-using Price = unsigned;
-using Quantity = unsigned;
-
 struct Order {
-    enum class Side {
-        Buy,
-        Sell
-    };
-    
     std::string traderId;
     Side side;
     Quantity quantity;
