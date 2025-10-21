@@ -8,5 +8,5 @@ A console-based implementation of a simple trade matching engine.
 mkdir build && cd build
 cmake ..
 make
-./TradeMatchingEngine
+./trade-matching-engine
 ```
