@@ -13,7 +13,7 @@ namespace engine {
 
 class MatchingEngine {
 public:
-    void processOrder(Order& order);
+    [[nodiscard]] std::set<Trade> processOrder(Order& order);
 
 private:
     void addRestingOrder(const Order& aggressor) noexcept;
@@ -49,8 +49,6 @@ private:
     void processTrade(Order& aggressor, Order& restingOrder, Quantity tradeQuantity, std::set<Trade>& trades);
     
     void insertOrMerge(std::set<Trade>& trades, const Trade& newTrade);
-    
-    void printTrades(const std::set<Trade>& trades) const noexcept;
     
 private:
     OrderBook buys{std::greater<Price>{}};

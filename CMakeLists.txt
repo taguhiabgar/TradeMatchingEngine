@@ -9,10 +9,11 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 
 # CONFIGURE_DEPENDS ensures new files are detected without rerunning cmake manually
 file(GLOB ENGINE_SOURCES CONFIGURE_DEPENDS "src/engine/*.cpp" "src/engine/*.h")
+file(GLOB UTILS_SOURCES CONFIGURE_DEPENDS "src/utils/*.cpp" "src/utils/*.h")
 
 set(MAIN_SOURCE src/main.cpp)
 
-add_executable(trade-matching-engine ${MAIN_SOURCE} ${ENGINE_SOURCES})
+add_executable(trade-matching-engine ${MAIN_SOURCE} ${ENGINE_SOURCES} ${UTILS_SOURCES})
 
 
 # Compiler warnings and errors

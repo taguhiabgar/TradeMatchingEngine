@@ -2,23 +2,11 @@
 
 namespace engine {
 
-void MatchingEngine::printTrades(const std::set<Trade>& trades) const noexcept {
-    if (trades.empty()) {
-        return;
-    }
-    for (const auto& trade: trades) {
-        std::cout << trade << ' ';
-    }
-    std::cout << std::endl;
-}
-
-void MatchingEngine::processOrder(Order& aggressor) {
+std::set<Trade> MatchingEngine::processOrder(Order& aggressor) {
     if (aggressor.isBuy()) {
-        auto trades = executeTrades(aggressor, sells, buys);
-        printTrades(trades);
+        return executeTrades(aggressor, sells, buys);
     } else {
-        auto trades = executeTrades(aggressor, buys, sells);
-        printTrades(trades);
+        return executeTrades(aggressor, buys, sells);
     }
 }
 
