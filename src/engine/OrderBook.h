@@ -4,6 +4,7 @@
 #include <map>
 #include <deque>
 #include <optional>
+#include <functional>
 #include <algorithm>
 
 namespace engine {
